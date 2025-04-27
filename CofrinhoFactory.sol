@@ -1,4 +1,4 @@
-//Qualquer pessoa pode criar o seu próprio cofrinho, com um nome. 
+//Qualquer pessoa pode criar o seu próprio cofrinho dando um nome a ele          
 //O contrato vai manter um registro de todos os cofrinhos, associando dono, nome e saldo.
 
 // SPDX-License-Identifier: MIT
@@ -33,30 +33,33 @@ contract CofrinhoFactory {
         emit CofrinhoCriado(msg.sender, _nome);
     }
 
-    //Adiciona saldo em um cofrinho especificio do usuário
-    function depositar(uint indice) public payable {
+    modifier somenteDono(uint indice) {
         //cofresDoUsuario[msg.sender] é uma lista (array) de cofrinhos da pessoa que está chamando a função msg.sender
         //Verificação de segurança para garantir que o índice realmente existe no array.
         require(indice < cofresDoUsuario[msg.sender].length, "Cofrinho nao encontrado");
+        _;
+    }
+
+    //Adiciona saldo em um cofrinho especificio do usuário
+    function depositar(uint indice) public somenteDono(indice) payable {
         cofresDoUsuario[msg.sender][indice].saldo += msg.value;
     }
 
     //Consulta saldo de um cofrinho do usuário
-    function verSaldo(uint indice) public view returns (uint) {
-        require(indice < cofresDoUsuario[msg.sender].length, "Cofrinho nao encontrado");
+    function verSaldo(uint indice) public somenteDono(indice) view returns (uint) {
         return cofresDoUsuario[msg.sender][indice].saldo;
     }
 
     //Consulta nome de um cofrinho do usuario
-    function verNome(uint indice) public view returns (string memory) {
-        require(indice < cofresDoUsuario[msg.sender].length, "Cofrinho nao encontrado");
+    function verNome(uint indice) public somenteDono(indice) view returns (string memory) {
         return cofresDoUsuario[msg.sender][indice].nome;
     }
 
     //Saca todo o valor de um cofrinho
     //indice representa qual cofrinho da lista deseja sacar
-    function sacar(uint indice) public {
-        require(indice < cofresDoUsuario[msg.sender].length, "Cofrinho nao encontrado");
+    function sacar(uint indice) public somenteDono(indice) {
+        //retirado pois o modifier soDono faz isso 
+        //require(indice < cofresDoUsuario[msg.sender].length, "Cofrinho nao encontrado");
 
         uint valor = cofresDoUsuario[msg.sender][indice].saldo;
         //Verifica se tem algo no cofrinho, se tiver mostra a mensagem
